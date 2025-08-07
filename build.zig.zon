@@ -35,8 +35,8 @@
             .hash = "dvui-0.2.0-AQFJma9kzwB8VpcAzoYCWeyoJbm2kT4WKTc0OjUbv44d",
         },
         .icons = .{
-            .url = "git+https://github.com/nat3Github/zig-lib-icons#8e34a0324d46d73a5a59bda09892ac5140b54c0f",
-            .hash = "icons-0.0.0-iJxA-c33MwAwe2T9SnPQlmpIkKfdNt9jQ5buN-CLufTe",
+            .url = "git+https://github.com/nat3Github/zig-lib-icons#6ea01f3f4914ab2b9ca5d70d715f370d94a2abc6",
+            .hash = "icons-0.0.0-iJxA-fH3MwBFNo9WOqj82cNpy9DMb6LgYEB21w-G84SU",
         },
     },
     .paths = .{
