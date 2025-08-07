@@ -28,6 +28,11 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-linux
     steps:
+      - name: Configure Git to use Schannel on Windows
+        if: runner.os == 'Windows'
+        run: git config --global http.sslbackend schannel
+        shell: bash
+
       - name: Checkout code
         uses: actions/checkout@v4
 
