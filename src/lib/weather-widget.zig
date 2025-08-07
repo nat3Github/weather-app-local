@@ -64,7 +64,6 @@ pub fn generate(pool: *std.Thread.Pool, arena: *std.heap.ArenaAllocator, db: *Ca
             return error.DataPointOutOfBounds;
         }
     }
-
     const duped_center_data = weather.Minutes15Raw{
         .time = try arena.child_allocator.dupe(@typeInfo(@TypeOf(@field(center_data, "time"))).pointer.child, center_data.time),
         .temperature_2m = try arena.child_allocator.dupe(@typeInfo(@TypeOf(@field(center_data, "temperature_2m"))).pointer.child, center_data.temperature_2m),
@@ -208,7 +207,7 @@ const CenterInfo = struct {
 };
 arena: std.heap.ArenaAllocator,
 db: Cache,
-asw: *AsyncWeatherGen,
+asw: AsyncWeatherGen = .{},
 img: Image,
 img2: Image,
 img_bool: bool = true,
@@ -234,9 +233,7 @@ pub fn get_img(self: *@This()) *Image {
     };
 }
 pub fn init(alloc: Allocator, width_height: usize) !@This() {
-    const wfw = try AsyncWeatherGen.init(alloc);
     return @This(){
-        .asw = wfw,
         .img = try Image.init(alloc, width_height, width_height),
         .img2 = try Image.init(alloc, width_height, width_height),
         .alloc = alloc,
@@ -245,12 +242,21 @@ pub fn init(alloc: Allocator, width_height: usize) !@This() {
     };
 }
 pub fn deinit(self: *@This()) void {
-    const alloc = self.alloc;
+    self.asw.join();
+    if (self.state == .Fetch) {
+        if (self.asw.result().? catch null) |res| {
+            const xupd, const im, const info = res;
+            self.free();
+            self.legend = im;
+            self.center_info = info;
+            self.img_bool = !self.img_bool;
+            self.upd = xupd;
+        }
+    }
     self.img.deinit();
     self.img2.deinit();
-    self.asw.deinit(alloc);
-    self.arena.deinit();
     self.free();
+    self.arena.deinit();
     self.db.deinit();
 }
 
@@ -278,7 +284,7 @@ pub fn fetch(
     upd: UpdateParameter,
     force_update: bool,
 ) !bool {
-    const asw = self.asw;
+    const asw = &self.asw;
     const state = &self.state;
     switch (state.*) {
         .None => {
@@ -300,9 +306,9 @@ pub fn fetch(
         },
         .Fetch => {
             dvui.refresh(dvui.currentWindow(), @src(), null);
-            if (asw.result_ready()) {
+            if (asw.result()) |res| {
                 state.* = .None;
-                const xupd, const im, const info = try asw.result();
+                const xupd, const im, const info = try res;
                 self.free();
                 self.legend = im;
                 self.center_info = info;

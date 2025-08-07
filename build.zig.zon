@@ -15,8 +15,8 @@
             .hash = "tailwind-0.0.0-j7vJMd0vAAD73YpI5PS1FuPJlYrlGCwGvM5E-xYtWWgl",
         },
         .fifoasync = .{
-            .url = "git+https://github.com/nat3Github/zig-lib-fifoasync#7370800a1a567d2b27071fbf4a15658c6ba0d989",
-            .hash = "fifoasync-0.0.0-XvoAAJfgAAADXRPGBJSAiMNtPU4ToHP-fbgeSfR6ffDW",
+            .url = "git+https://github.com/nat3Github/zig-lib-fifoasync#2986ada75be00dc9be33134c20e1d62038ab5aef",
+            .hash = "fifoasync-0.0.0-XvoAAJu6AQAwD3ViaRlbNQUJMnPn-PG_XxN8zLWq--J1",
         },
         .sqlite3 = .{
             .url = "git+https://github.com/nat3Github/zig-lib-sqlite3#f3ee8e70a0b7c2291484311db31548c5555543ae",

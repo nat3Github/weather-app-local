@@ -122,7 +122,7 @@ pub fn init(db_name: []const u8) !@This() {
         try std.fs.selfExeDirPathAlloc(alloc);
 
     const db_path = try std.fmt.allocPrintZ(alloc, "{s}/{s}.db", .{ exe_dir, db_name });
-    // std.log.warn("cache path is {s}", .{db_path});
+    std.debug.print("cache path is {s}\n", .{db_path});
     var db = try Conn.init(db_path);
     const create_table_weather_data_sql = comptime sqlite.sql.simple_table_from_struct(WeatherSQL, WeatherSQL.TABLE_NAME);
     try db.execute(create_table_weather_data_sql, void, void_ptr, no_op);
@@ -202,9 +202,6 @@ pub fn get_or_fetch_maptile(self: *@This(), alloc: Allocator, x: u32, y: u32, z:
         var arena = std.heap.ArenaAllocator.init(alloc);
         defer arena.deinit();
         const dat = try osmr.maptiler.downloadTile(arena.allocator(), x, y, z, api_key);
-        var file = try std.fs.cwd().createFile("testfiles/maptile.pb", .{});
-        defer file.close();
-        try file.writeAll(dat);
         try self.maptile.insert(x, y, z, dat);
         return try self.maptile.get(alloc, x, y, z);
     } else {

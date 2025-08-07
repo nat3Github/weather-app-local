@@ -9,12 +9,13 @@ const dvui = @import("dvui");
 const weather = root.weather;
 const osmr = @import("osmr");
 const fifoasync = @import("fifoasync");
+const AsyncExecutor = fifoasync.sched.AsyncExecutor;
 
 const Texture = dvui.Texture;
 const Image = root.Image;
 const Pixel = Image.Pixel;
-const ASW = fifoasync.prioque.ASNode;
-const Task = fifoasync.prioque.Task;
+const AsFn = fifoasync.sched.ASFunction;
+const Task = fifoasync.sched.Task;
 const Color = osmr.Color;
 const Tailwind = osmr.Tailwind;
 const latLonToTileF64 = weather.weather.latLonToTileF64;
@@ -34,7 +35,6 @@ weather_widget: WeatherWidget,
 cities: Cities,
 datapoint: usize = 0,
 
-async_exec: []Sched.AsyncExecutor,
 alloc: Allocator,
 img: Image,
 redraw: bool = false,
@@ -45,20 +45,20 @@ width: usize = 1024,
 height: usize = 1024,
 
 const image_size = 1920;
-pub fn init(alloc: Allocator, sched: *Sched) !@This() {
-    const num_executors = 9;
-    const aex = try alloc.alloc(Sched.AsyncExecutor, num_executors);
-    for (aex) |*ex| {
-        ex.* = sched.get_async_executor(0, sched.get_free_slot());
-    }
+pub fn init(alloc: Allocator) !@This() {
     return @This(){
         .alloc = alloc,
         .maps_widget = try MapsWidget.init(alloc, image_size),
         .weather_widget = try WeatherWidget.init(alloc, image_size),
-        .async_exec = aex,
         .img = try Image.init(alloc, image_size, image_size),
         .cities = try Cities.init(alloc),
     };
+}
+pub fn deinit(self: *@This(), _: Allocator) void {
+    self.maps_widget.deinit();
+    self.weather_widget.deinit();
+    self.img.deinit();
+    self.cities.deinit();
 }
 pub fn resize(self: *@This(), width: usize, height: usize) !bool {
     const wh = @max(width, height);
@@ -84,7 +84,7 @@ pub fn resize(self: *@This(), width: usize, height: usize) !bool {
     return false;
 }
 
-pub fn fetch(self: *@This(), pool: *std.Thread.Pool, view_port: dvui.Rect, lat: f32, lon: f32, z: u32, datapoint: *usize, weather_style: WeatherWidget.WStyle) !struct {
+pub fn fetch(self: *@This(), async_exe: AsyncExecutor, pool: *std.Thread.Pool, view_port: dvui.Rect, lat: f32, lon: f32, z: u32, datapoint: *usize, weather_style: WeatherWidget.WStyle) !struct {
     maps_update: bool,
     weather_update: bool,
 } {
@@ -95,7 +95,7 @@ pub fn fetch(self: *@This(), pool: *std.Thread.Pool, view_port: dvui.Rect, lat: 
     // MAPS
     const maps_update = try self.maps_widget.fetch(
         pool,
-        self.async_exec[0],
+        async_exe,
         .{
             .lat = lat,
             .lon = lon,
@@ -110,7 +110,7 @@ pub fn fetch(self: *@This(), pool: *std.Thread.Pool, view_port: dvui.Rect, lat: 
     // WEATHER
     const weather_update = try self.weather_widget.fetch(
         pool,
-        self.async_exec[3],
+        async_exe,
         .{
             .lat = lat,
             .lon = lon,
@@ -120,7 +120,7 @@ pub fn fetch(self: *@This(), pool: *std.Thread.Pool, view_port: dvui.Rect, lat: 
         },
         size_update,
     );
-    _ = try self.cities.fetch(self.async_exec[1], .{ .lat = lat, .lon = lon, .z = z });
+    _ = try self.cities.fetch(async_exe, .{ .lat = lat, .lon = lon, .z = z });
     return .{
         .maps_update = maps_update,
         .weather_update = weather_update,
@@ -168,8 +168,8 @@ pub fn overlay_weather_img(self: *@This(), view_port: dvui.Rect, weather_style: 
         },
     }
 }
-pub fn draw(self: *@This(), pool: *std.Thread.Pool, view_port: dvui.Rect, lat: f32, lon: f32, z: u32, datapoint: *usize, weather_style: WeatherWidget.WStyle, utc_offset: i64) !void {
-    const fetch_res = try self.fetch(pool, view_port, lat, lon, z, datapoint, weather_style);
+pub fn draw(self: *@This(), async_exe: AsyncExecutor, pool: *std.Thread.Pool, view_port: dvui.Rect, lat: f32, lon: f32, z: u32, datapoint: *usize, weather_style: WeatherWidget.WStyle, utc_offset: i64) !void {
+    const fetch_res = try self.fetch(async_exe, pool, view_port, lat, lon, z, datapoint, weather_style);
     const try_again = self.redraw or fetch_res.maps_update or fetch_res.weather_update;
     var xredraw = false;
     if (try_again) {
@@ -182,7 +182,7 @@ pub fn draw(self: *@This(), pool: *std.Thread.Pool, view_port: dvui.Rect, lat: f
 
     // CITY NAMES
     if (true) {
-        const upd_cities = try self.cities.fetch(self.async_exec[1], .{ .lat = lat, .lon = lon, .z = z });
+        const upd_cities = try self.cities.fetch(async_exe, .{ .lat = lat, .lon = lon, .z = z });
         _ = upd_cities;
         if (self.cities.cities) |xcities| {
             for (xcities[0..@min(10, xcities.len)], 0..) |cit, i| {
@@ -369,12 +369,4 @@ fn dvui_col_from(col: Color) dvui.Color {
         .b = b,
         .a = a,
     };
-}
-
-pub fn deinit(self: *@This(), alloc: Allocator) void {
-    self.maps_widget.deinit();
-    self.weather_widget.deinit();
-    self.img.deinit();
-    self.cities.deinit();
-    alloc.free(self.async_exec);
 }

@@ -10,7 +10,6 @@ pub const weather = root.weather;
 const osmr = @import("osmr");
 const fifoasync = @import("fifoasync");
 
-const ASW = fifoasync.sched.ASNode;
 const Task = fifoasync.sched.Task;
 const latLonToTileF64 = weather.weather.latLonToTileF64;
 const ImageWidget2 = @import("ImageWidget2.zig");
@@ -98,7 +97,7 @@ const UpdateParameter = struct {
     z: u32 = 0,
 };
 
-map_gen: *AsyncMapGen,
+map_gen: AsyncMapGen = .{},
 
 state: State = .None,
 alloc: Allocator,
@@ -109,16 +108,22 @@ cities: ?[]const City = null,
 const State = enum { None, Fetch };
 
 pub fn init(alloc: Allocator) !@This() {
-    const map_gen = try AsyncMapGen.init(alloc);
     return @This(){
-        .map_gen = map_gen,
         .alloc = alloc,
         .db = try Cache.init(CACHE_NAME),
     };
 }
 pub fn deinit(self: *@This()) void {
-    const alloc = self.alloc;
-    self.map_gen.deinit(alloc);
+    self.map_gen.join();
+    if (self.state == .Fetch) {
+        if (self.map_gen.result().? catch null) |res| {
+            const xupd, const cit = res;
+            self.upd = xupd;
+            self.free();
+            self.cities = cit;
+        }
+    }
+    self.db.deinit();
     self.free();
 }
 pub fn free(self: *@This()) void {
@@ -151,9 +156,9 @@ pub fn fetch(
         },
         .Fetch => {
             dvui.refresh(dvui.currentWindow(), @src(), null);
-            if (self.map_gen.result_ready()) {
+            if (self.map_gen.result()) |res| {
                 state.* = .None;
-                const xupd, const cit = try self.map_gen.result();
+                const xupd, const cit = try res;
                 self.upd = xupd;
                 self.free();
                 self.cities = cit;

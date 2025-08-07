@@ -181,6 +181,9 @@ fn handle_keys(ctx: *GuiContext) void {
     }
 }
 fn draw_app(ctx: *GuiContext) !void {
+    const pool = ctx.pool;
+    var __exe = ctx.sched.get_executor(0);
+    const as_exec = __exe.async_executor();
     const win = ctx.win orelse return;
     handle_keys(ctx);
     if (win.events.items.len > 0) ctx.inactivity_timer.reset();
@@ -209,7 +212,7 @@ fn draw_app(ctx: *GuiContext) !void {
             defer weatherbox.deinit();
             {
                 // std.log.warn("main app rect: {any}", .{mainbox.child_rect});
-                _ = try ctx.multi_widget.draw(ctx.pool, weatherbox.child_rect, lat, lon, ctx.zoom, &ctx.datapoint, ctx.style, utc_offset);
+                _ = try ctx.multi_widget.draw(as_exec, pool, weatherbox.child_rect, lat, lon, ctx.zoom, &ctx.datapoint, ctx.style, utc_offset);
             }
         }
 
@@ -325,19 +328,6 @@ fn draw_app(ctx: *GuiContext) !void {
             }
         }
     }
-    // try dvui.label(
-    //     @src(),
-    //     "fps: {d:.0}",
-    //     .{dvui.FPS()},
-    //     .{
-    //         .background = false,
-    //         .rect = .{ .x = 10, .y = 10, .h = 200, .w = 200 },
-    //         .font = .{
-    //             .name = "sfpro",
-    //             .size = 18,
-    //         },
-    //     },
-    // );
 }
 var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
 var ts_ctx: GuiContext = undefined;
@@ -385,9 +375,6 @@ pub fn main() !void {
     defer ts.deinit();
     var do_export = false;
 
-    var log_file = try std.fs.cwd().createFile("log.txt", .{});
-    defer log_file.close();
-
     var app_win = try dvui.Window.init(@src(), alloc, backend.backend(), .{});
     ctx.win = &app_win;
     defer app_win.deinit();
@@ -417,10 +404,10 @@ pub fn main() !void {
                 switch (e) {
                     error.OutOfMemory => @panic("out of memory"),
                     else => {
+                        if (true) panic("Error {}", .{e});
                         std.log.warn("{}", .{e});
                         dvui.refresh(dvui.currentWindow(), @src(), null);
                         ctx.error_timer = std.time.Timer.start() catch unreachable;
-                        log_file.writer().print("{}\n", .{e}) catch unreachable;
                     },
                 }
             };
@@ -465,6 +452,7 @@ pub fn main() !void {
     if (ts_current_desktop) |p| {
         _ = lib.wallpaper.setWallpaperOnAllScreensAndSpacesC(p);
     }
+    std.debug.print("deinit", .{});
 }
 pub fn th_write_screenshot(xalloc: Allocator, xcaptured_bytes: []const u8) void {
     const m = struct {
@@ -499,7 +487,7 @@ pub fn th_write_screenshot(xalloc: Allocator, xcaptured_bytes: []const u8) void 
 
 pub fn clean_up_export_path(gpa: Allocator) !void {
     if (ts_last_path_absolute) |abs_path| {
-        try std.fs.deleteFileAbsolute(abs_path);
+        std.fs.deleteFileAbsolute(abs_path) catch {};
         defer gpa.free(abs_path);
         ts_last_path_absolute = null;
     }
@@ -521,8 +509,10 @@ pub fn prepare_export() !bool {
 
     const vp2 = dvui.windowRectScale().rectFromPhysical(dvui.windowRectPixels());
     // std.log.warn("export rect: {any}", .{vp2});
+    var __exe = ts_ctx.sched.get_executor(0);
+    const as_exec = __exe.async_executor();
 
-    const res = multi_widget.fetch(ts_ctx.pool, vp2, lat, lon, z, &datapoint, style);
+    const res = multi_widget.fetch(as_exec, ts_ctx.pool, vp2, lat, lon, z, &datapoint, style);
     if (res) |_| {} else |e| {
         std.log.warn("{}", .{e});
     }
@@ -555,12 +545,14 @@ pub fn export_frame() !dvui.App.Result {
     const z = ts_ctx.zoom;
     const style = ts_ctx.style;
     var datapoint = ts_ctx.datapoint;
+    var __exe = ts_ctx.sched.get_executor(0);
+    const as_exec = __exe.async_executor();
 
     const multi_widget = &ts_ctx.multi_widget;
     const vp2 = dvui.windowRectScale().rectFromPhysical(dvui.windowRectPixels());
 
     multi_widget.redraw = true;
-    try multi_widget.draw(ts_ctx.pool, vp2, lat, lon, z, &datapoint, style, utc_offset);
+    try multi_widget.draw(as_exec, ts_ctx.pool, vp2, lat, lon, z, &datapoint, style, utc_offset);
     return .ok;
 }
 

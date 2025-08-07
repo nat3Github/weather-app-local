@@ -143,7 +143,7 @@ const UpdateParameter = struct {
 };
 
 pub const AsyncMapGen = fifoasync.sched.ASFunction(generate);
-map_gen: *AsyncMapGen,
+map_gen: AsyncMapGen = .{},
 img: Image,
 p: ?*Image = null,
 state: State = .None,
@@ -154,9 +154,7 @@ params: UpdateParameter = UpdateParameter{},
 const State = enum { None, Fetch };
 
 pub fn init(alloc: Allocator, img_size: usize) !@This() {
-    const map_gen = try AsyncMapGen.init(alloc);
     return @This(){
-        .map_gen = map_gen,
         .img = try Image.init(alloc, img_size, img_size),
         .alloc = alloc,
         .arena = std.heap.ArenaAllocator.init(alloc),
@@ -164,9 +162,9 @@ pub fn init(alloc: Allocator, img_size: usize) !@This() {
     };
 }
 pub fn deinit(self: *@This()) void {
-    const alloc = self.alloc;
+    self.map_gen.join();
+    self.db.deinit();
     self.img.deinit();
-    self.map_gen.deinit(alloc);
     self.arena.deinit();
 }
 pub fn fetch(
@@ -194,9 +192,9 @@ pub fn fetch(
         },
         .Fetch => {
             dvui.refresh(dvui.currentWindow(), @src(), null);
-            if (self.map_gen.result_ready()) {
+            if (self.map_gen.result()) |res| {
                 state.* = .None;
-                self.params = try self.map_gen.result();
+                self.params = try res;
                 self.p = &self.img;
                 return true;
             }

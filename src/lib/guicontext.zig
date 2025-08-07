@@ -9,6 +9,7 @@ const root = @import("../root.zig");
 const fifoasync = @import("fifoasync");
 
 pub const Sched = fifoasync.sched.DefaultSched;
+pub const AsyncExecutor = fifoasync.sched.AsyncExecutor;
 
 // const MapsWidget = root.OsmrWidget.OsmrWidgetFlex(Sched.AsyncExecutor);
 // const WeatherWidget = root.WeatherWidget.WeatherWidget(Sched.AsyncExecutor);
@@ -58,7 +59,7 @@ menu: Menu = .Menu,
 // maps_widget_lines: MapsWidget,
 // weather_widget: WeatherWidget,
 multi_widget: MultiplyWidget,
-sched: *Sched,
+sched: Sched,
 style: WeatherStyle = .None,
 blendmode: usize = 0,
 datapoint: usize = 0,
@@ -66,7 +67,6 @@ datapoint: usize = 0,
 location: ?Location = null,
 
 pool: *std.Thread.Pool,
-async_exec: []Sched.AsyncExecutor,
 alloc: Allocator,
 
 pub fn get_location(ctx: *GuiContext) !Location {
@@ -91,33 +91,34 @@ pub fn get_location(ctx: *GuiContext) !Location {
 }
 
 pub fn init(alloc: Allocator) !GuiContext {
-    var sched = try Sched.init(alloc, 2, 1);
-    const num_executors = 9;
-    const aex = try alloc.alloc(Sched.AsyncExecutor, num_executors);
-    for (aex) |*ex| {
-        ex.* = sched.get_async_executor(0, sched.get_free_slot());
-    }
+    var sched = try Sched.init(alloc, .{
+        .N_queue_capacity = 1024,
+        .N_queues = 1,
+        .N_threads = 2,
+    });
+    errdefer sched.deinit(alloc);
     const thread_count = 16;
     const pool: *std.Thread.Pool = try alloc.create(std.Thread.Pool);
     try std.Thread.Pool.init(pool, .{ .allocator = alloc, .n_jobs = thread_count });
-
+    errdefer pool.deinit();
+    const multi = try MultiplyWidget.init(alloc);
+    errdefer multi.deinit(alloc);
     return GuiContext{
         .alloc = alloc,
-        .multi_widget = try MultiplyWidget.init(alloc, sched),
+        .multi_widget = multi,
         .sched = sched,
-        .async_exec = aex,
         .pool = pool,
         .inactivity_timer = std.time.Timer.start() catch panic("timer creation failed", .{}),
     };
 }
 pub fn deinit(self: *GuiContext) void {
     const alloc = self.alloc;
-    self.sched.shutdown() catch unreachable;
-    self.sched.deinit();
     self.multi_widget.deinit(alloc);
+    std.debug.print("multi deinit\n", .{});
+    self.sched.deinit(alloc);
+    std.debug.print("sched deinit\n", .{});
     self.pool.deinit();
     alloc.destroy(self.pool);
-    alloc.free(self.async_exec);
 }
 pub fn inactive(self: *GuiContext) bool {
     return self.inactivity_timer.read() > 10 * 1_000_000_000;

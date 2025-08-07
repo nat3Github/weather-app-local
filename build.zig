@@ -21,7 +21,7 @@ fn update_step(step: *std.Build.Step, _: std.Build.Step.MakeOptions) !void {
         GitDependency{
             // fifoasync
             .url = "https://github.com/nat3Github/zig-lib-fifoasync",
-            .branch = "master",
+            .branch = "rt-sched",
         },
         GitDependency{
             // sqlite
