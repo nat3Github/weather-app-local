@@ -1,0 +1,53 @@
+.{
+    .fingerprint = 0xa7e1d2a1a2cbdf64,
+
+    .name = .weatherapp,
+
+    .version = "0.0.0",
+
+    .dependencies = .{
+        .image = .{
+            .url = "git+https://github.com/nat3Github/zig-lib-image#73bbce55f9e31241167d38c95ccab173c358e4b6",
+            .hash = "image-0.0.0-FDpZou-lAACxPZzf2oAlvnS05DbLEdWZmsFkm9jJibmO",
+        },
+        .tailwind = .{
+            .url = "git+https://github.com/nat3Github/zig-lib-tailwind-colors#d537cda9f7f8053597f4423fcaa8babe8deb7d09",
+            .hash = "tailwind-0.0.0-j7vJMd0vAAD73YpI5PS1FuPJlYrlGCwGvM5E-xYtWWgl",
+        },
+        .fifoasync = .{
+            .url = "git+https://github.com/nat3Github/zig-lib-fifoasync#7370800a1a567d2b27071fbf4a15658c6ba0d989",
+            .hash = "fifoasync-0.0.0-XvoAAJfgAAADXRPGBJSAiMNtPU4ToHP-fbgeSfR6ffDW",
+        },
+        .sqlite3 = .{
+            .url = "git+https://github.com/nat3Github/zig-lib-sqlite3#f3ee8e70a0b7c2291484311db31548c5555543ae",
+            .hash = "sqlite3-0.0.0-CYVP9WMSpADWcDezky700oYxzxZLCmpB3r-sdTUwtsGj",
+        },
+        .osmr = .{
+            .url = "git+https://github.com/nat3Github/zig-lib-osmr#eb47150b345ed0392c36daf45397fcd975356bbf",
+            .hash = "osmr-0.0.0-ZpJLcLMQAgB-TTfwWl4QhJlLarPSUx7It9GgKYhsQ7gn",
+        },
+        .serialization = .{
+            .url = "git+https://github.com/nat3Github/zig-lib-serialization-dev-fork#63044c1e710b057639829236528bca1fdb7fa0b2",
+            .hash = "serialization-0.0.4-YFq9IvLDAAAi_kcnTeFv6O2NUigDtG5asy8k7lnJbXjm",
+        },
+        .dvui = .{
+            .url = "git+https://github.com/nat3Github/zig-lib-dvui-dev-fork#bd35b7114d6468c700d0742af4aad64d836fc470",
+            .hash = "dvui-0.2.0-AQFJma9kzwB8VpcAzoYCWeyoJbm2kT4WKTc0OjUbv44d",
+        },
+        .icons = .{
+            .url = "git+https://github.com/nat3Github/zig-lib-icons#8e34a0324d46d73a5a59bda09892ac5140b54c0f",
+            .hash = "icons-0.0.0-iJxA-c33MwAwe2T9SnPQlmpIkKfdNt9jQ5buN-CLufTe",
+        },
+    },
+    .paths = .{
+        "assets",
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "weather",
+        "update.zig",
+        // For example...
+        "LICENSE",
+        //"README.md",
+    },
+}

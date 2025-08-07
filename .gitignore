@@ -1,0 +1,10 @@
+output
+zig-out
+.zig-cache
+.env
+*.db
+testfiles
+.DS_Store
+weather/README.md
+weather/src/body.json
+weather/src/erroredbody.json
