@@ -43,7 +43,7 @@ jobs:
         shell: bash
 
       - name: Build Zig application for ${{ matrix.target }} on ${{ matrix.os }}
-        run: zig build release -Dtarget=${{ matrix.target }} # use the build step 'release'
+        run: zig build release # use the build step 'release'
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
