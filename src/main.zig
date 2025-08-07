@@ -450,7 +450,9 @@ pub fn main() !void {
     }
     try clean_up_export_path(ts.allocator);
     if (ts_current_desktop) |p| {
-        _ = lib.wallpaper.setWallpaperOnAllScreensAndSpacesC(p);
+        if (builtin.os.tag == .macos) {
+            _ = lib.wallpaper.setWallpaperOnAllScreensAndSpacesC(p);
+        }
     }
     std.debug.print("deinit", .{});
 }

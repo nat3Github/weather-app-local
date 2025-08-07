@@ -151,12 +151,24 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
     app.root_module.addImport("weatherapp", weatherapp_mod);
-
     b.installArtifact(app);
 
     const run_cmd1 = b.addRunArtifact(app);
     run_cmd1.step.dependOn(b.getInstallStep());
     step_run.dependOn(&run_cmd1.step);
+
+    const release_build = b.addExecutable(.{
+        .name = "Weather-App-Local",
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = .ReleaseFast,
+        .link_libc = true,
+    });
+    release_build.root_module.addImport("weatherapp", weatherapp_mod);
+    const copy_release = b.addInstallBinFile(release_build.getEmittedBin(), "Weather-App-Local");
+
+    const release_step = b.step("release", "build native release");
+    release_step.dependOn(&copy_release.step);
 }
 
 test "test all refs" {

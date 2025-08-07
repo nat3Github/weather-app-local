@@ -18,7 +18,8 @@ pub const dvui = @import("dvui");
 pub const datetime = @import("lib/datetime.zig");
 pub const weather = @import("weather/src/root.zig");
 pub const fifoasync = @import("fifoasync");
-pub const wallpaper = @import("wallpaper");
+
+pub const wallpaper = if (builtin.os.tag == .macos) @import("wallpaper") else null;
 
 test "all" {
     _ = .{
@@ -26,7 +27,7 @@ test "all" {
         // datetime,
         // OsmrWidget,
         // MultiplyWidget,
-        wallpaper};
+    };
     // std.testing.refAllDecls(@This());
 }
 
