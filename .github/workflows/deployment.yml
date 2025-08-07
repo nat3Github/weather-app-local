@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.os }}
-          path: zig-out/bin
+          path: zig-out/bin/app
   release:
     runs-on: ubuntu-latest
     needs: build
@@ -53,24 +53,24 @@ jobs:
           name: binary-macos-latest
           path: dist/macos
 
-      - name: Download Linux artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: binary-ubuntu-latest
-          path: dist/linux
+      # - name: Download Linux artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: binary-ubuntu-latest
+      #     path: dist/linux
 
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: binary-windows-latest
-          path: dist/windows
+      # - name: Download Windows artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: binary-windows-latest
+      #     path: dist/windows
 
       - name: Prepare release files
         run: |
           # Example: Zip up the binaries for release
           zip -r dist/weather-app-local-macos.zip dist/macos
-          zip -r dist/weather-app-local-linux.zip dist/linux
-          zip -r dist/weather-app-local-windows.zip dist/windows
+          # zip -r dist/weather-app-local-linux.zip dist/linux
+          # zip -r dist/weather-app-local-windows.zip dist/windows
         shell: bash
 
       - name: Create GitHub Release
@@ -83,5 +83,5 @@ jobs:
             Binaries for macOS, Linux, and Windows.
           files: |
             dist/weather-app-local-macos.zip
-            dist/weather-app-local-linux.zip
-            dist/weather-app-local-windows.zip
+            # dist/weather-app-local-linux.zip
+            # dist/weather-app-local-windows.zip
