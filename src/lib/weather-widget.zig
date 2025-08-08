@@ -160,7 +160,6 @@ pub fn generate(pool: *std.Thread.Pool, arena: *std.heap.ArenaAllocator, db: *Ca
                 pix_size * len,
             );
             weather.legend2(&im, t);
-            try im.write_ppm_to_file("testfiles/legend-rain.ppm");
             break :blk im;
         },
         .Wind => blk: {
