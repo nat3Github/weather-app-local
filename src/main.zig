@@ -356,7 +356,7 @@ pub fn main() !void {
         .size = .{ .w = 800.0, .h = 600.0 },
         .min_size = .{ .w = 250.0, .h = 350.0 },
         .vsync = true,
-        .title = "weather screensaver",
+        .title = "Weather App Local",
         // .icon = window_icon_png, // can also call setIconFromFileContent()
     });
     ctx.backend = backend;
