@@ -350,6 +350,7 @@ pub fn main() !void {
     defer ctx.deinit();
     ts_ctx = try GuiContext.init(alloc);
     defer ts_ctx.deinit();
+    const window_icon_png = @embedFile("assets/appicon.png");
 
     var backend = try Backend.initWindow(.{
         .allocator = alloc,
@@ -357,8 +358,9 @@ pub fn main() !void {
         .min_size = .{ .w = 250.0, .h = 350.0 },
         .vsync = true,
         .title = "Weather App Local",
-        // .icon = window_icon_png, // can also call setIconFromFileContent()
+        .icon = window_icon_png, // can also call setIconFromFileContent()
     });
+
     ctx.backend = backend;
     defer backend.deinit();
 
