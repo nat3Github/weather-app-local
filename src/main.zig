@@ -404,7 +404,7 @@ pub fn main() !void {
                 switch (e) {
                     error.OutOfMemory => @panic("out of memory"),
                     else => {
-                        if (true) panic("Error {}", .{e});
+                        // if (true) panic("Error {}", .{e});
                         std.log.warn("{}", .{e});
                         dvui.refresh(dvui.currentWindow(), @src(), null);
                         ctx.error_timer = std.time.Timer.start() catch unreachable;
