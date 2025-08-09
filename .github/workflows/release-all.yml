@@ -20,19 +20,14 @@ jobs:
       matrix:
         include:
           - os: macos-latest
-            target: x86_64-macos # macOS Intel
+            target: x86_64-macos
           - os: macos-latest
-            target: aarch64-macos # macOS ARM64 (Apple Silicon)
-          - os: windows-latest
-            target: x86_64-windows-msvc
+            target: aarch64-macos
+          - os: ubuntu-latest
+            target: x86_64-windows-gnu
           - os: ubuntu-latest
             target: x86_64-linux
     steps:
-      - name: Configure Git to use Schannel on Windows
-        if: runner.os == 'Windows'
-        run: git config --global http.sslbackend schannel
-        shell: bash
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -48,12 +43,12 @@ jobs:
         shell: bash
 
       - name: Build Zig application for ${{ matrix.target }} on ${{ matrix.os }}
-        run: zig build release # use the build step 'release'
+        run: zig build release -Dtarget=${{ matrix.target }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: binary-${{ matrix.target }} # Use target for unique artifact names
+          name: binary-${{ matrix.target }}
           path: zig-out/bin
 
   release:
@@ -78,7 +73,7 @@ jobs:
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: binary-x86_64-windows-msvc
+          name: binary-x86_64-windows-gnu
           path: dist/windows-x86_64
 
       - name: Download Linux artifact
@@ -86,16 +81,6 @@ jobs:
         with:
           name: binary-x86_64-linux
           path: dist/linux-x86_64
-
-      - name: Prepare release files
-        run: |
-          # The executable name from your build script is "Weather-App-Local"
-          # Zip up the binaries for release
-          zip -r dist/weather-app-local-macos-x86_64.zip dist/macos-x86_64
-          zip -r dist/weather-app-local-macos-aarch64.zip dist/macos-aarch64
-          zip -r dist/weather-app-local-windows-x86_64.zip dist/windows-x86_64
-          zip -r dist/weather-app-local-linux-x86_64.zip dist/linux-x86_64
-        shell: bash
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -105,9 +90,9 @@ jobs:
           body: |
             Automated release from GitHub Actions.
 
-            Binaries for macOS (Intel & ARM64), Windows, and Linux.
+            Binaries for macOS (Intel & ARM64), Windows (GNU), and Linux.
           files: |
-            dist/weather-app-local-macos-x86_64.zip
-            dist/weather-app-local-macos-aarch64.zip
-            dist/weather-app-local-windows-x86_64.zip
-            dist/weather-app-local-linux-x86_64.zip
+            dist/macos-x86_64
+            dist/macos-aarch64
+            dist/windows-x86_64
+            dist/linux-x86_64
