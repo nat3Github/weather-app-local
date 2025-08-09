@@ -1,4 +1,4 @@
-name: Zig Build
+name: Windows CC build
 
 on:
   workflow_dispatch:
