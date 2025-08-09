@@ -139,7 +139,6 @@ pub fn build(b: *std.Build) void {
     const test1 = b.addTest(.{
         .root_module = weatherapp_mod,
     });
-    b.installArtifact(test1);
     const test1_run = b.addRunArtifact(test1);
     step_test.dependOn(&test1_run.step);
 
@@ -165,12 +164,8 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
     release_build.root_module.addImport("weatherapp", weatherapp_mod);
-    const copy_release = b.addInstallBinFile(release_build.getEmittedBin(), "Weather-App-Local");
+    const install_release = b.addInstallArtifact(release_build, .{});
 
     const release_step = b.step("release", "build native release");
-    release_step.dependOn(&copy_release.step);
-}
-
-test "test all refs" {
-    std.testing.refAllDeclsRecursive(@This());
+    release_step.dependOn(&install_release.step);
 }
