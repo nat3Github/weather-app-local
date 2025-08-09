@@ -156,7 +156,7 @@ pub fn build(b: *std.Build) void {
     run_cmd1.step.dependOn(b.getInstallStep());
     step_run.dependOn(&run_cmd1.step);
 
-    std.debug.print("abi: {} cpu: {} os: {}", .{ target.result.abi, target.result.cpu, target.result.os });
+    // std.debug.print("abi: {} cpu: {} os: {}", .{ target.result.abi, target.result.cpu, target.result.os });
 
     const release_build = b.addExecutable(.{
         .name = "Weather-App-Local",

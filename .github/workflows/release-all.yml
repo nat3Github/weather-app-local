@@ -37,7 +37,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-aarch64-none
+          name: aarch64-macos-none
           path: zig-out/bin
 
   linux-windows:
