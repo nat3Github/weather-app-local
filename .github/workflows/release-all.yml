@@ -106,6 +106,15 @@ jobs:
           name: aarch64-linux-gnu
           path: linux-aarch64
 
+      - name: Prepare and zip release files
+        run: |
+          # cd dist
+          zip -r macos-aarch64.zip macos-aarch64
+          zip -r windows-x86_64.zip windows-x86_64
+          zip -r linux-x86_64.zip linux-x86_64
+          zip -r linux-aarch64.zip linux-aarch64
+        shell: bash
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
