@@ -108,7 +108,6 @@ jobs:
 
       - name: Prepare and zip release files
         run: |
-          # cd dist
           zip -r macos-aarch64.zip macos-aarch64
           zip -r windows-x86_64.zip windows-x86_64
           zip -r linux-x86_64.zip linux-x86_64
@@ -125,7 +124,7 @@ jobs:
 
             Binaries for macOS (Intel & ARM64), Windows (GNU), and Linux.
           files: |
-            macos-aarch64
-            windows-x86_64
-            linux-x86_64
-            linux-aarch64
+            macos-aarch64.zip
+            windows-x86_64.zip
+            linux-x86_64.zip
+            linux-aarch64.zip
