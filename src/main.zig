@@ -336,7 +336,14 @@ var ts_last_path_absolute: ?[:0]const u8 = null;
 var ts_current_desktop: ?[:0]const u8 = null;
 const sf_pro_ttf = @embedFile("assets/SF-Pro.ttf");
 
+const winapi = if (builtin.os.tag == .windows) struct {
+    extern "kernel32" fn AttachConsole(dwProcessId: std.os.windows.DWORD) std.os.windows.BOOL;
+} else struct {};
+
 pub fn main() !void {
+    comptime std.debug.assert(@hasDecl(Backend, "SDLBackend"));
+    if (@import("builtin").os.tag == .windows) _ = winapi.AttachConsole(0xFFFFFFFF);
+
     if (builtin.os.tag == .macos) {
         const c_str = lib.wallpaper.getCurrentWallpaperPathC();
         if (c_str == null) return error.WallPaperError;
