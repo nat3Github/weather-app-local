@@ -47,6 +47,7 @@ fn update_step(step: *std.Build.Step, _: std.Build.Step.MakeOptions) !void {
             //dvui
             .url = "https://github.com/nat3Github/zig-lib-dvui-dev-fork",
             .branch = "weatherapp",
+            // .branch = "latest",
         },
     };
     try update.update_dependency(step.owner.allocator, deps);

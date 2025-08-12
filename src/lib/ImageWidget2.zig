@@ -15,27 +15,35 @@ img_bytes: []u8 = undefined,
 img_width: u32 = undefined,
 img_height: u32 = undefined,
 
-/// img_bytes are rgba pma
-pub fn image(src: std.builtin.SourceLocation, name: []const u8, img_bytes: []u8, img_width: u32, img_height: u32, opts: Options) !void {
-    _ = dvui.image(src, .{
-        .bytes = .{
-            .pixels = .{
-                .bytes = dvui.RGBAPixelsPMA.cast(img_bytes),
-                .width = img_width,
-                .height = img_height,
-            },
+pub fn rgba_u8_slice_to_img_source(img_bytes: []u8, img_width: u32, img_height: u32) dvui.ImageSource {
+    return .{
+        .pixelsPMA = .{
+            .rgba = dvui.Color.PMA.sliceFromRGBA(img_bytes),
+            .width = img_width,
+            .height = img_height,
         },
-        .name = name,
-    }, opts);
+    };
 }
 
-pub fn invalidate_cache(rgba_normal: []const u8) void {
-    dvui.TextureCacheEntry.invalidateCachedImage(.{ .pixels = .{ .bytes = dvui.RGBAPixelsPMA.cast(@constCast(rgba_normal)), .height = 0, .width = 0 } });
+pub fn invalidate_cache(img_source: dvui.ImageSource) void {
+    const key = img_source.hash();
+    dvui.textureInvalidateCache(key);
+}
+pub fn invalidate(img: *Image) void {
+    const key = image_to_img_src(img).hash();
+    dvui.textureInvalidateCache(key);
 }
 
 // const root = @import("../lib.zig");
 // const musicfiles = @import("musicfiles");
 // const Image = musicfiles.Image;
+pub fn image_to_img_src(img: *Image) dvui.ImageSource {
+    return rgba_u8_slice_to_img_source(
+        @constCast(img.get_pixel_data()),
+        @intCast(img.get_width()),
+        @intCast(img.get_height()),
+    );
+}
 
 pub fn draw_square_image_centered_in_rect(img: *Image, rect: dvui.Rect, id: u32) !void {
     const max_wh = @max(rect.h, rect.w);
@@ -47,12 +55,9 @@ pub fn draw_square_image_centered_in_rect(img: *Image, rect: dvui.Rect, id: u32)
         .x = rect.x + dx,
         .y = rect.y + dy,
     };
-    try ImageWidget2.image(
+    _ = dvui.image(
         @src(),
-        "myimage",
-        @constCast(img.get_pixel_data()),
-        @intCast(img.get_width()),
-        @intCast(img.get_height()),
+        .{ .source = image_to_img_src(img) },
         .{
             .rect = r,
             .max_size_content = dvui.Options.MaxSize{
@@ -68,7 +73,8 @@ pub fn draw_square_image_centered_in_rect(img: *Image, rect: dvui.Rect, id: u32)
     );
 }
 
-pub fn draw_img(src: std.builtin.SourceLocation, name: []const u8, img: *Image, rect: dvui.Rect, opts: dvui.Options) !void {
+pub fn draw_img(src: std.builtin.SourceLocation, img: *Image, rect: dvui.Rect, opts: dvui.Options) !void {
+    const imsrc = ImageWidget2.image_to_img_src(img);
     var op = opts;
     if (op.rect == null) {
         op.rect = rect;
@@ -85,12 +91,5 @@ pub fn draw_img(src: std.builtin.SourceLocation, name: []const u8, img: *Image, 
             .w = rect.w,
         };
     }
-    try ImageWidget2.image(
-        src,
-        name,
-        @constCast(img.get_pixel_data()),
-        @intCast(img.get_width()),
-        @intCast(img.get_height()),
-        op,
-    );
+    _ = dvui.image(src, .{ .source = imsrc }, op);
 }

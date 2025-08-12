@@ -93,7 +93,6 @@ pub fn get_location(ctx: *GuiContext) !Location {
 pub fn init(alloc: Allocator) !GuiContext {
     var sched = try Sched.init(alloc, .{
         .N_queue_capacity = 1024,
-        .N_queues = 1,
         .N_threads = 2,
     });
     errdefer sched.deinit(alloc);

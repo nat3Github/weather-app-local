@@ -15,8 +15,8 @@
             .hash = "tailwind-0.0.0-j7vJMd0vAAD73YpI5PS1FuPJlYrlGCwGvM5E-xYtWWgl",
         },
         .fifoasync = .{
-            .url = "git+https://github.com/nat3Github/zig-lib-fifoasync#382a8123b461cb56d674d2f311b10193284a832a",
-            .hash = "fifoasync-0.0.0-XvoAAGy7AQC7Gg1BlsOQINgQMB_Hk2pHprg-SCQlyf7O",
+            .url = "git+https://github.com/nat3Github/zig-lib-fifoasync#4fbd8ef6c0e6e101ad8a4c7865bce28c1aeb6998",
+            .hash = "fifoasync-0.0.0-XvoAABrgAQDuqt7M1j4eRQ7G4lYrcv4cRKd4jIn7mv1a",
         },
         .sqlite3 = .{
             .url = "git+https://github.com/nat3Github/zig-lib-sqlite3#f3ee8e70a0b7c2291484311db31548c5555543ae",
@@ -31,8 +31,8 @@
             .hash = "serialization-0.0.4-YFq9IvLDAAAi_kcnTeFv6O2NUigDtG5asy8k7lnJbXjm",
         },
         .dvui = .{
-            .url = "git+https://github.com/nat3Github/zig-lib-dvui-dev-fork#bd35b7114d6468c700d0742af4aad64d836fc470",
-            .hash = "dvui-0.2.0-AQFJma9kzwB8VpcAzoYCWeyoJbm2kT4WKTc0OjUbv44d",
+            .url = "git+https://github.com/nat3Github/zig-lib-dvui-dev-fork#9b743164be117f83858319a60cde7b1693dfae5d",
+            .hash = "dvui-0.2.0-AQFJmU-g0gCKcmwCn_5-LBbUSzfMLkw5kx07y0tPr-yf",
         },
         .icons = .{
             .url = "git+https://github.com/nat3Github/zig-lib-icons#6ea01f3f4914ab2b9ca5d70d715f370d94a2abc6",
