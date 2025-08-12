@@ -10,37 +10,29 @@ const GuiContext = lib.GuiContext;
 const OsmrWidget = lib.OsmrWidget.QuarterWidget;
 const Image = lib.Image;
 const math = std.math;
-const Color = lib.Image.Pixel;
+const Pixel = lib.Image.Pixel;
 const Tailwind = lib.Tailwind;
+const Color = dvui.Color;
 
 comptime {
     std.debug.assert(@hasDecl(Backend, "SDLBackend"));
 }
 
-fn dvui_col_from(col: Color) dvui.Color {
-    const r, const g, const b, const a = col.to_rgba_tuple();
-    return dvui.Color{
-        .r = r,
-        .g = g,
-        .b = b,
-        .a = a,
-    };
-}
 fn draw_error_screen(wait_x_seconds: u64) !void {
     {
-        var mainbox = dvui.box(@src(), .vertical, .{
+        var mainbox = dvui.box(@src(), .{ .dir = .vertical }, .{
             .background = true,
             .expand = .both,
-            .color_fill = .{ .color = dvui_col_from(.from_hex(Tailwind.sky900)) },
+            .color_fill = .fromHex(Tailwind.sky900),
             .gravity_x = 0.5,
         });
         defer mainbox.deinit();
         {
-            var mbox = dvui.box(@src(), .horizontal, .{
+            var mbox = dvui.box(@src(), .{ .dir = .horizontal }, .{
                 .background = false,
                 .gravity_x = 0.5,
                 .expand = .vertical,
-                .color_fill = .{ .color = dvui_col_from(.from_hex(Tailwind.sky600)) },
+                .color_fill = .fromHex(Tailwind.sky600),
             });
             defer mbox.deinit();
             dvui.icon(
@@ -50,7 +42,7 @@ fn draw_error_screen(wait_x_seconds: u64) !void {
                 .{},
                 .{
                     .background = true,
-                    .color_fill = .{ .color = dvui_col_from(.from_hex(Tailwind.teal950)) },
+                    .color_fill = .fromHex(Tailwind.teal950),
                     .min_size_content = .{ .w = 80, .h = 80 },
                     .margin = .all(50),
                     .padding = .all(15),
@@ -61,19 +53,19 @@ fn draw_error_screen(wait_x_seconds: u64) !void {
             );
         }
         {
-            var box2 = dvui.box(@src(), .vertical, .{
+            var box2 = dvui.box(@src(), .{ .dir = .horizontal }, .{
                 .background = false,
                 .gravity_x = 0.5,
                 .min_size_content = .{ .h = 150, .w = 500 },
-                .color_fill = .{ .color = dvui_col_from(.from_hex(Tailwind.green600)) },
+                .color_fill = .fromHex(Tailwind.green600),
             });
             defer box2.deinit();
             dvui.label(@src(), "something went wrong . . .\nretrying in {}", .{wait_x_seconds}, .{
                 .background = false,
-                .color_text = .{ .color = dvui_col_from(.from_hex(Tailwind.neutral50)) },
+                .color_text = .fromHex(Tailwind.neutral50),
                 .gravity_y = 0.5,
                 .min_size_content = dvui.Size{ .w = 400, .h = 200 },
-                .font = .{ .name = "sfpro", .size = 42 },
+                .font = .{ .id = .fromName("sfpro"), .size = 42 },
             });
         }
     }
@@ -180,10 +172,29 @@ fn handle_keys(ctx: *GuiContext) void {
         }
     }
 }
+fn icon_bar_button(src: std.builtin.SourceLocation, tvg_bytes: []const u8) bool {
+    var neutral_50: Color = .fromHex(Tailwind.neutral50);
+    neutral_50.a = 150;
+    const icon_opts = dvui.Options{
+        .min_size_content = .{ .h = 30 },
+        .color_fill = neutral_50,
+        .color_accent = neutral_50,
+        .color_text = .black,
+        // .color_fill_hover = .fromHex(Tailwind.teal500),
+    };
+    const icon_render_opts = dvui.IconRenderOptions{ .stroke_width = 1.5 };
+    return dvui.buttonIcon(
+        src,
+        "",
+        tvg_bytes,
+        .{},
+        icon_render_opts,
+        icon_opts,
+    );
+}
 fn draw_app(ctx: *GuiContext) !void {
     const pool = ctx.pool;
-    var __exe = ctx.sched.get_executor(0);
-    const as_exec = __exe.async_executor();
+    const as_exec = ctx.sched.async_executor();
     const win = ctx.win orelse return;
     handle_keys(ctx);
     if (win.events.items.len > 0) ctx.inactivity_timer.reset();
@@ -195,19 +206,17 @@ fn draw_app(ctx: *GuiContext) !void {
     const utc_offset = loc.offset; // 3600 * 2;
 
     {
-        var mainbox = dvui.box(@src(), .horizontal, .{
+        var mainbox = dvui.box(@src(), .{ .dir = .horizontal }, .{
             .background = false,
             .expand = .both,
-            .color_fill = .{ .color = dvui_col_from(.from_hex(Tailwind.red400)) },
+            .color_fill = .fromHex(Tailwind.red400),
         });
         defer mainbox.deinit();
         // WEATHER
         {
-            var weatherbox = dvui.box(@src(), .horizontal, .{
+            var weatherbox = dvui.box(@src(), .{ .dir = .horizontal }, .{
                 .rect = mainbox.child_rect,
-                .color_fill = .{
-                    .color = dvui_col_from(.from_hex(Tailwind.blue300)),
-                },
+                .color_fill = .fromHex(Tailwind.blue300),
             });
             defer weatherbox.deinit();
             {
@@ -218,15 +227,15 @@ fn draw_app(ctx: *GuiContext) !void {
 
         // MENU
         {
-            var menubox = dvui.box(@src(), .horizontal, .{
+            var menubox = dvui.box(@src(), .{ .dir = .horizontal }, .{
                 .background = false,
                 .rect = mainbox.child_rect,
-                .color_fill = .{ .color = dvui_col_from(.from_hex(Tailwind.orange300)) },
+                .color_fill = .fromHex(Tailwind.orange300),
             });
             defer menubox.deinit();
 
             {
-                var ctrlboxbox = dvui.box(@src(), .vertical, .{
+                var ctrlboxbox = dvui.box(@src(), .{ .dir = .vertical }, .{
                     .corner_radius = .all(5),
                     .background = false,
                     .expand = .vertical,
@@ -234,10 +243,10 @@ fn draw_app(ctx: *GuiContext) !void {
                 });
                 defer ctrlboxbox.deinit();
                 {
-                    var neutral800 = dvui_col_from(.from_hex(Tailwind.neutral800));
-                    neutral800.a = 220;
-                    var controlbox = dvui.box(@src(), .vertical, .{
-                        .color_fill = .{ .color = neutral800 },
+                    var neutral800 = Color.fromHex(Tailwind.neutral800);
+                    neutral800.a = 150;
+                    var controlbox = dvui.box(@src(), .{ .dir = .vertical }, .{
+                        .color_fill = neutral800,
                         .corner_radius = .all(5),
                         .background = true,
                         .padding = .all(2),
@@ -245,83 +254,32 @@ fn draw_app(ctx: *GuiContext) !void {
                     });
                     defer controlbox.deinit();
 
-                    var neutral_50 = dvui_col_from(.from_hex(Tailwind.neutral50));
+                    var neutral_50: Color = .fromHex(Tailwind.neutral50);
                     neutral_50.a = 200;
 
                     const lucide = lib.icons.lucide;
-                    const icon_opts = dvui.Options{
-                        .min_size_content = .{ .h = 30 },
-                        .color_fill = .{ .color = neutral_50 },
-                        .color_accent = .{ .color = neutral_50 },
-                        .color_fill_hover = .{
-                            .color = dvui_col_from(.from_hex(Tailwind.teal500)),
-                        },
-                    };
-                    const icon_render_opts = dvui.IconRenderOptions{ .stroke_width = 1.5 };
                     // magnify
-                    if (dvui.buttonIcon(
-                        @src(),
-                        "",
-                        lucide.@"zoom-in",
-                        .{},
-                        icon_render_opts,
-                        icon_opts,
-                    )) {
+                    if (icon_bar_button(@src(), lucide.@"zoom-in")) {
                         controls.magnify(ctx);
                     }
                     // minify
-                    if (dvui.buttonIcon(
-                        @src(),
-                        "",
-                        lucide.@"zoom-out",
-                        .{},
-                        icon_render_opts,
-                        icon_opts,
-                    )) {
+                    if (icon_bar_button(@src(), lucide.@"zoom-out")) {
                         controls.minify(ctx);
                     }
                     // maps
-                    if (dvui.buttonIcon(
-                        @src(),
-                        "",
-                        lucide.map,
-                        .{},
-                        icon_render_opts,
-                        icon_opts,
-                    )) {
+                    if (icon_bar_button(@src(), lucide.map)) {
                         controls.maps(ctx);
                     }
                     //temperature
-                    if (dvui.buttonIcon(
-                        @src(),
-                        "",
-                        lucide.thermometer,
-                        .{},
-                        icon_render_opts,
-                        icon_opts,
-                    )) {
+                    if (icon_bar_button(@src(), lucide.thermometer)) {
                         controls.temp2m(ctx);
                     }
                     //rain
-                    if (dvui.buttonIcon(
-                        @src(),
-                        "",
-                        lucide.@"cloud-drizzle",
-                        .{},
-                        icon_render_opts,
-                        icon_opts,
-                    )) {
+                    if (icon_bar_button(@src(), lucide.@"cloud-drizzle")) {
                         controls.rain(ctx);
                     }
                     //wind
-                    if (dvui.buttonIcon(
-                        @src(),
-                        "",
-                        lucide.wind,
-                        .{},
-                        icon_render_opts,
-                        icon_opts,
-                    )) {
+                    if (icon_bar_button(@src(), lucide.wind)) {
                         controls.wind(ctx);
                     }
                 }
@@ -395,6 +353,7 @@ pub fn main() !void {
     main_loop: while (true) {
         const nstime = app_win.beginWait(interrupted);
         try app_win.begin(nstime);
+
         const quit = try backend.addAllEvents(&app_win);
         if (quit) break :main_loop;
 
@@ -523,8 +482,7 @@ pub fn prepare_export() !bool {
 
     const vp2 = dvui.windowRectScale().rectFromPhysical(dvui.windowRectPixels());
     // std.log.warn("export rect: {any}", .{vp2});
-    var __exe = ts_ctx.sched.get_executor(0);
-    const as_exec = __exe.async_executor();
+    const as_exec = ts_ctx.sched.async_executor();
 
     const res = multi_widget.fetch(as_exec, ts_ctx.pool, vp2, lat, lon, z, &datapoint, style);
     if (res) |_| {} else |e| {
@@ -559,29 +517,12 @@ pub fn export_frame() !dvui.App.Result {
     const z = ts_ctx.zoom;
     const style = ts_ctx.style;
     var datapoint = ts_ctx.datapoint;
-    var __exe = ts_ctx.sched.get_executor(0);
-    const as_exec = __exe.async_executor();
+    const as_exec = ts_ctx.sched.async_executor();
 
     const multi_widget = &ts_ctx.multi_widget;
     const vp2 = dvui.windowRectScale().rectFromPhysical(dvui.windowRectPixels());
 
     multi_widget.redraw = true;
     try multi_widget.draw(as_exec, ts_ctx.pool, vp2, lat, lon, z, &datapoint, style, utc_offset);
-    return .ok;
-}
-
-pub fn export_frame2() anyerror!dvui.App.Result {
-    const vp = dvui.windowRect();
-    const vp2: dvui.Rect = .{
-        .w = vp.w,
-        .h = vp.h,
-        .x = vp.x,
-        .y = vp.y,
-    };
-    dvui.label(@src(), ",", .{}, .{
-        .rect = vp2,
-        .background = true,
-        .color_fill = .fromColor(.red),
-    });
     return .ok;
 }

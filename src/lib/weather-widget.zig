@@ -15,29 +15,19 @@ const Texture = dvui.Texture;
 const Image = root.Image;
 const ASW = fifoasync.sched.ASNode;
 const Task = fifoasync.sched.Task;
-const Color = osmr.Color;
 const Tailwind = osmr.Tailwind;
 const latLonToTileF32 = @import("weather").weather.latLonToTileF32;
 const ImageWidget2 = @import("ImageWidget2.zig");
 const Cache = root.db;
 pub const CACHE_NAME = "cache";
 
+const Color = dvui.Color;
 pub const Style = enum {
     None,
     Wind,
     Percipitation,
     Temperature,
 };
-
-fn col(color: Color) dvui.Color {
-    const r, const g, const b, const a = color.rgba();
-    return dvui.Color{
-        .a = a,
-        .r = r,
-        .g = g,
-        .b = b,
-    };
-}
 
 const static_z = 6;
 const order = 8; // 19x19
@@ -336,7 +326,7 @@ pub fn draw(
         try ImageWidget2.draw_square_image_centered_in_rect(img, view_port, id);
     }
 }
-const transparent = dvui.Color{ .a = 0x00 };
+const transparent = Color{ .a = 0x00 };
 fn timestrEx(unix: i64) ![]const u8 {
     const cw = dvui.currentWindow();
     const alloc = cw.arena();
@@ -381,7 +371,7 @@ pub fn draw_timeline(
     var timeline_rec = view_port;
     timeline_rec.h = view_port.h / 6;
     timeline_rec.y = 15;
-    var box = dvui.box(@src(), .horizontal, .{ .rect = timeline_rec });
+    var box = dvui.box(@src(), .{ .dir = .horizontal }, .{ .rect = timeline_rec });
     defer box.deinit();
     if (self.center_info.data) |dat| {
         const now_idx = get_now_idx(dat);
@@ -436,23 +426,23 @@ pub fn draw_timeline(
                 j,
             );
         }
-        var red: dvui.Color = .fromHex(Tailwind.indigo700);
+        var red: Color = .fromHex(Tailwind.indigo700);
         red.a = 160;
-        var white: dvui.Color = .fromHex(Tailwind.sky700);
-        var black: dvui.Color = .fromHex(Tailwind.stone700);
+        var white: Color = .fromHex(Tailwind.sky700);
+        var black: Color = .fromHex(Tailwind.stone700);
         black.a = 120;
         white.a = 160;
         for (dat.time, 0..) |_, i| {
-            var fill: dvui.Options.ColorOrName = .fromColor(transparent);
-            if (datapoint.* == i) fill = .fromColor(white);
-            if (now_idx == i) fill = .fromColor(red);
+            var fill: Color = transparent;
+            if (datapoint.* == i) fill = white;
+            if (now_idx == i) fill = red;
             if (dvui.button(@src(), "", .{}, .{
                 .padding = .all(0),
                 .margin = .all(0),
                 .background = true,
                 .color_fill = fill,
-                .color_fill_hover = .fromColor(black),
-                .color_accent = .fromColor(transparent),
+                // .color_fill_hover = black,
+                .color_accent = transparent,
                 .id_extra = i,
                 .rect = dvui.Rect{
                     .h = timeline_rec.h,
@@ -467,7 +457,7 @@ pub fn draw_timeline(
         dvui.label(@src(), "Now", .{}, .{
             .background = false,
             .color_text = .fromHex(Tailwind.neutral900),
-            .font = .{ .name = "sfpro", .size = 22 },
+            .font = .{ .id = .fromName("sfpro"), .size = 22 },
             .id_extra = j,
             .rect = dvui.Rect{
                 .h = timeline_rec.h,
@@ -487,9 +477,9 @@ pub fn draw_timeline(
     }
 }
 fn whitebox_text(src: std.builtin.SourceLocation, comptime fmt: []const u8, args: anytype, x: f32, y: f32, idx: usize) !void {
-    var twhite = dvui.Color.fromHex(Tailwind.neutral50);
+    var twhite = Color.fromHex(Tailwind.neutral50);
     twhite.a = 120;
-    var box2 = dvui.box(src, .vertical, .{
+    var box2 = dvui.box(src, .{ .dir = .vertical }, .{
         .rect = .{
             .w = 300,
             .h = 40,
@@ -510,8 +500,8 @@ fn whitebox_text(src: std.builtin.SourceLocation, comptime fmt: []const u8, args
         .gravity_y = 0,
         .background = true,
         .corner_radius = .all(4),
-        .color_fill = .fromColor(twhite),
+        .color_fill = twhite,
         .color_text = .fromHex(Tailwind.neutral900),
-        .font = .{ .name = "sfpro", .size = 22 },
+        .font = .{ .id = .fromName("sfpro"), .size = 22 },
     });
 }

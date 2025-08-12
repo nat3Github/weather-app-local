@@ -16,7 +16,7 @@ const Image = root.Image;
 const Pixel = Image.Pixel;
 const AsFn = fifoasync.sched.ASFunction;
 const Task = fifoasync.sched.Task;
-const Color = osmr.Color;
+const Color = dvui.Color;
 const Tailwind = osmr.Tailwind;
 const latLonToTileF64 = weather.weather.latLonToTileF64;
 const ImageWidget2 = @import("ImageWidget2.zig");
@@ -134,7 +134,7 @@ pub fn copy_map_img(self: *@This()) !bool {
                 self.img.set_pixel(x, y, pimg.get_pixel(x, y));
             }
         }
-        ImageWidget2.invalidate_cache(self.img.get_pixel_data());
+        ImageWidget2.invalidate(&self.img);
         self.blended = false;
         return false;
     } else return true;
@@ -163,7 +163,7 @@ pub fn overlay_weather_img(self: *@This(), view_port: dvui.Rect, weather_style: 
                         self.img.set_pixel(x, y, wpx.blend_runtime(xpx, blendm, .premultiplied));
                     }
                 }
-                ImageWidget2.invalidate_cache(self.img.get_pixel_data());
+                ImageWidget2.invalidate(&self.img);
             }
         },
     }
@@ -200,19 +200,19 @@ fn center_weather_time_and_info(self: *WeatherWidget, view_port: dvui.Rect, utc_
     const style = self.upd.style;
     if (style == .None) {
         const weather_txt_bg_col = switch (style) {
-            .None => dvui_col_from_alpha(.from_hex(Tailwind.white), 120),
-            else => dvui_col_from(.from_hex(Tailwind.neutral800)),
+            .None => dvui_col_from_alpha(.fromHex(Tailwind.white), 120),
+            else => Color.fromHex(Tailwind.neutral800),
         };
-        var tboxbox = dvui.box(@src(), .horizontal, .{
+        var tboxbox = dvui.box(@src(), .{ .dir = .horizontal }, .{
             .rect = view_port,
             .padding = .all(10),
         });
         defer tboxbox.deinit();
         {
-            var tbox = dvui.box(@src(), .vertical, .{
+            var tbox = dvui.box(@src(), .{ .dir = .vertical }, .{
                 .gravity_x = 1,
                 .padding = .all(15),
-                .color_fill = .{ .color = weather_txt_bg_col },
+                .color_fill = weather_txt_bg_col,
                 .background = true,
                 .corner_radius = .all(5),
             });
@@ -224,8 +224,8 @@ fn center_weather_time_and_info(self: *WeatherWidget, view_port: dvui.Rect, utc_
                     datetime.hour, datetime.minute,
                 }, .{
                     .background = false,
-                    .color_text = .fromColor(weather_text_color(style)),
-                    .font = .{ .name = "sfpro", .size = 60 },
+                    .color_text = weather_text_color(style),
+                    .font = .{ .id = .fromName("sfpro"), .size = 60 },
                 });
             }
         }
@@ -236,14 +236,14 @@ fn center_weather_time_and_info(self: *WeatherWidget, view_port: dvui.Rect, utc_
 
 fn weather_text_color(style: WeatherWidget.Style) dvui.Color {
     return switch (style) {
-        .None => dvui_col_from(.from_hex(Tailwind.neutral900)),
-        else => dvui_col_from(.from_hex(Tailwind.white)),
+        .None => .fromHex(Tailwind.neutral900),
+        else => .fromHex(Tailwind.white),
     };
 }
 
 fn draw_legend(self: *WeatherWidget, view_port: dvui.Rect) !void {
     const style = self.upd.style;
-    var neutral800 = dvui_col_from(.from_hex(Tailwind.neutral800));
+    var neutral800: Color = .fromHex(Tailwind.neutral800);
     neutral800.a = 220;
     const px = 10;
     const py = 10;
@@ -263,7 +263,7 @@ fn draw_legend(self: *WeatherWidget, view_port: dvui.Rect) !void {
         };
         switch (style) {
             .None => return,
-            else => try ImageWidget2.draw_img(@src(), "legend", img, r, .{}),
+            else => try ImageWidget2.draw_img(@src(), img, r, .{}),
         }
         const arr: []const []const u8, const text_width: f32 = switch (style) {
             .None => .{ &.{}, 0 },
@@ -271,7 +271,7 @@ fn draw_legend(self: *WeatherWidget, view_port: dvui.Rect) !void {
             .Temperature => .{ weather.render.def_temp.Legend, 38 },
             .Wind => .{ weather.render.def_wind.Legend, 82 },
         };
-        const brect = dvui.Rect{
+        var brect = dvui.Rect{
             .h = r.h,
             .w = text_width,
             .x = r.x - text_width,
@@ -279,30 +279,35 @@ fn draw_legend(self: *WeatherWidget, view_port: dvui.Rect) !void {
         };
         dvui.label(@src(), "", .{}, .{
             .background = true,
-            .color_fill = .fromColor(neutral800),
-            // .border = .all(1),
-            // .color_border = .fromColor(.red),
+            .color_fill = neutral800,
             .rect = brect,
             .corner_radius = .{ .x = rad, .y = 0, .h = rad, .w = 0 },
         });
-        for (arr, 0..) |s, i| {
-            const lrect = dvui.Rect{
-                .h = w,
-                .w = text_width,
-                .x = brect.x,
-                .y = brect.y + w * @as(f32, @floatFromInt(i)),
-            };
-            dvui.label(@src(), "{s}", .{s}, .{
-                .rect = lrect,
-                .margin = .all(0),
-                .padding = .all(0),
-                .background = false,
-                .id_extra = i,
-                .color_text = .fromColor(.fromHex(Tailwind.white)),
-                .font = .{ .name = "sfpro", .size = 18 },
-                // .color_border = .fromColor(.blue),
-                // .border = .all(1),
+        brect.y += 5;
+        {
+            var kbox = dvui.box(@src(), .{ .dir = .vertical }, .{
+                .rect = brect,
             });
+            defer kbox.deinit();
+            for (arr, 0..) |s, i| {
+                // const lrect = dvui.Rect{
+                //     .h = w,
+                //     .w = text_width,
+                //     .x = brect.x,
+                //     .y = brect.y + w * @as(f32, @floatFromInt(i)),
+                // };
+                dvui.label(@src(), "{s}", .{s}, .{
+                    // .rect = lrect,
+                    .margin = .all(0),
+                    .padding = .all(0),
+                    .background = false,
+                    .id_extra = i,
+                    .expand = .vertical,
+                    .gravity_x = 0.5,
+                    .color_text = .fromHex(Tailwind.white),
+                    .font = .{ .id = .fromName("sfpro"), .size = 18 },
+                });
+            }
         }
     }
 }
@@ -311,20 +316,20 @@ fn draw_city(view_port: dvui.Rect, cit: City, id: usize, weather_style: WeatherW
     const max_wh = @max(view_port.h, view_port.w);
     const dx = 0.5 * (view_port.w - max_wh);
     const dy = 0.5 * (view_port.h - max_wh);
-    const col =
+    const col: Color =
         switch (weather_style) {
-            .None => dvui_col_from(.from_hex(Tailwind.neutral800)),
-            else => dvui_col_from(.from_hex(Tailwind.white)),
+            .None => .fromHex(Tailwind.neutral800),
+            else => .fromHex(Tailwind.white),
         };
 
     {
-        var neutral800 =
+        var neutral800: dvui.Color =
             switch (weather_style) {
-                .None => dvui_col_from(.from_hex(Tailwind.neutral50)),
-                else => dvui_col_from(.from_hex(Tailwind.neutral800)),
+                .None => .fromHex(Tailwind.neutral50),
+                else => .fromHex(Tailwind.neutral800),
             };
         neutral800.a = 120;
-        var box2 = dvui.box(@src(), .vertical, .{
+        var box2 = dvui.box(@src(), .{ .dir = .vertical }, .{
             .rect = .{
                 .w = 300,
                 .h = 50,
@@ -332,7 +337,7 @@ fn draw_city(view_port: dvui.Rect, cit: City, id: usize, weather_style: WeatherW
                 .y = cit.y * max_wh + dy - 25,
             },
             .background = false,
-            .color_fill = .{ .color = dvui_col_from(.from_hex(Tailwind.blue300)) },
+            .color_fill = .fromHex(Tailwind.blue300),
             .id_extra = id,
             .padding = .all(0),
             .margin = .all(0),
@@ -345,28 +350,18 @@ fn draw_city(view_port: dvui.Rect, cit: City, id: usize, weather_style: WeatherW
             .gravity_y = 0.5,
             .background = true,
             .corner_radius = .all(5),
-            .color_fill = .{ .color = neutral800 },
+            .color_fill = neutral800,
             .id_extra = id,
-            .color_text = .{ .color = col },
-            .font = .{ .name = "sfpro", .size = 22 },
+            .color_text = col,
+            .font = .{ .id = .fromName("sfpro"), .size = 22 },
         });
     }
 }
-fn dvui_col_from_alpha(col: Color, alpha: u8) dvui.Color {
-    const r, const g, const b, _ = col.to_rgba_tuple();
+fn dvui_col_from_alpha(col: dvui.Color, alpha: u8) dvui.Color {
     return dvui.Color{
-        .r = r,
-        .g = g,
-        .b = b,
+        .r = col.r,
+        .g = col.g,
+        .b = col.b,
         .a = alpha,
-    };
-}
-fn dvui_col_from(col: Color) dvui.Color {
-    const r, const g, const b, const a = col.to_rgba_tuple();
-    return dvui.Color{
-        .r = r,
-        .g = g,
-        .b = b,
-        .a = a,
     };
 }
