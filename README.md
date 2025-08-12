@@ -1,6 +1,17 @@
 # Weather App Local
 - visualize short term weather data (12 hours) for your current location
 
+<table>
+  <tr>
+    <td><img src="map-example.png" alt="map example" width="500"/></td>
+    <td><img src="temp-example.png" alt="temperature example" width="500"/></td>
+  </tr>
+  <tr>
+    <td><img src="wind-example.png" alt="wind example" width="500"/></td>
+      <td><img src="rain-example" alt="rain example" width="500"/></td>
+  </tr>
+</table>
+
 # Downloads
 - for windows, macos and linux there are automaticly build releases [here](https://github.com/nat3Github/weather-app-local/releases) for testing the app
 - these are build with a privat api key which can get exhausted as too many users use the auto releases
