@@ -37,3 +37,4 @@
 - Map rendering: [osmr](https://github.com/nat3Github/zig-lib-osmr)
 - Painting: [z2d](https://github.com/vancluever/z2d)
 - Icons: [icons](https://github.com/nat3Github/zig-lib-icons)
+- ... and a lot more, thank you!
