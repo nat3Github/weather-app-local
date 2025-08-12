@@ -25,14 +25,14 @@
 
 # Building from source
 - a maptiler api key is needed for building
-- create a file named `.env` under `src/lib` with contents maptiler_api_key = "use_your_maptiler_api_key_here"
+- create a file named `.env` under `src/lib` with contents `maptiler_api_key = "use_your_maptiler_api_key_here"`
 - a maptiler api key can be obtained by creating an account on [maptiler](https://cloud.maptiler.com/auth/widget?next=https://cloud.maptiler.com/maps/)
 
 - install zig 0.14.1 from  [ziglang](https://ziglang.org/download/)
-- clone this repository
+- download/clone this repository
 - navigate into the repository
-- run `zig build release` to make an release build for you current platform
-- binary is in the zig-out folder
+- run `zig build release` to make an release build for you current Operating System (Windows, MacOs, Linux)
+- the output binary is in the zig-out folder
 
 # Related libraries
 - GUI framework: [dvui](https://github.com/david-vanderson/dvui)
