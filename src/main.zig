@@ -392,6 +392,7 @@ pub fn main() !void {
     main_loop: while (true) {
         const nstime = app_win.beginWait(interrupted);
         try app_win.begin(nstime);
+
         const quit = try backend.addAllEvents(&app_win);
         if (quit) break :main_loop;
 
