@@ -297,12 +297,7 @@ const sf_pro_ttf = @embedFile("assets/SF-Pro.ttf");
 pub fn main() !void {
     comptime std.debug.assert(@hasDecl(Backend, "SDLBackend"));
     if (@import("builtin").os.tag == .windows) { // optional
-        const winapi = struct {
-            extern "kernel32" fn AttachConsole(dwProcessId: std.os.windows.DWORD) std.os.windows.BOOL;
-        };
-        const ATTACH_PARENT_PROCESS: std.os.windows.DWORD = 0xFFFFFFFF; //DWORD(-1)
-        const res = winapi.AttachConsole(ATTACH_PARENT_PROCESS);
-        if (res == std.os.windows.FALSE) {}
+        dvui.Backend.Common.windowsAttachConsole() catch {};
     }
 
     if (builtin.os.tag == .macos) {
