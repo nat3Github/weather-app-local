@@ -120,9 +120,8 @@ jobs:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref }}
           name: Release ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref }}
           body: |
-            Automated release from GitHub Actions.
-
-            Binaries for macOS (Intel & ARM64), Windows (GNU), and Linux.
+            Automated release build by Github.
+            Binaries for MacOS (ARM64), Windows (GNU), and Linux (X86 + ARM64).
           files: |
             macos-aarch64.zip
             windows-x86_64.zip
