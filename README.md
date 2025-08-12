@@ -8,7 +8,7 @@
   </tr>
   <tr>
     <td><img src="wind-example.png" alt="wind example" width="500"/></td>
-      <td><img src="rain-example" alt="rain example" width="500"/></td>
+      <td><img src="rain-example.png" alt="rain example" width="500"/></td>
   </tr>
 </table>
 
