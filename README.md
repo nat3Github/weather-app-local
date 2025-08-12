@@ -15,7 +15,9 @@
 # Downloads
 - for windows, macos and linux there are automaticly build releases [here](https://github.com/nat3Github/weather-app-local/releases) for testing the app
 - these are build with a privat api key which can get exhausted as too many users use the auto releases
+- if this troubles you please consider getting your own api key from maptiler and [build from source](#Building-from-source)
 - on macos, first make the app executable by running `chmod +x Weather-App-Local` in a terminal, you need to allow the app to run in your settings, after that you can use it normally
+
 
 # Building from source
 - a maptiler api key is needed for building
