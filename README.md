@@ -31,3 +31,9 @@
 - navigate into the repository
 - run `zig build release` to make an release build for you current platform
 - binary is in the zig-out folder
+
+# Related libraries
+- GUI framework: [dvui](https://github.com/david-vanderson/dvui)
+- Map rendering: [osmr](https://github.com/nat3Github/zig-lib-osmr)
+- Painting: [z2d](https://github.com/vancluever/z2d)
+- Icons: [icons](https://github.com/nat3Github/zig-lib-icons)
