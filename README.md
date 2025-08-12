@@ -17,6 +17,7 @@
 - these are build with a privat api key which can get exhausted as too many users use the auto releases
 - if this troubles you please consider getting your own api key from maptiler and [build from source](#Building-from-source)
 - on macos, first make the app executable by running `chmod +x Weather-App-Local` in a terminal, you need to allow the app to run in your settings, after that you can use it normally
+- on windows you can run the .exe but you need to click to the context menu to allow to manually trust it to run
 
 
 # Building from source
