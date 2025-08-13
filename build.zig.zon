@@ -46,8 +46,8 @@
         "src",
         "weather",
         "update.zig",
-        // For example...
         "LICENSE",
-        //"README.md",
+        "build",
+        "README.md",
     },
 }

@@ -169,7 +169,7 @@ pub fn build(b: *std.Build) void {
     release_build.root_module.addImport("weatherapp", weatherapp_mod);
     const install_release = b.addInstallArtifact(release_build, .{});
     if (target.result.os.tag == .windows) {
-        release_build.win32_manifest = b.path("./src/main.manifest");
+        release_build.win32_manifest = b.path("build/main.manifest");
         release_build.subsystem = .Windows;
     }
 

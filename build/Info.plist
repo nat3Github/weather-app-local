@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.nat3apps.WeatherAppLocal</string>
+
+    <key>CFBundleName</key>
+    <string>Weather App Local</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+
+    <key>CFBundleVersion</key>
+    <string>1</string>
+
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2025 nat3. All rights reserved.</string>
+
+    <key>CFBundleExecutable</key>
+    <string>YourAppExecutable</string>
+
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <key>NSMainStoryboardFile</key>
+    <string>Main</string>
+
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.developer-tools</string>
+</dict>
+</plist>
