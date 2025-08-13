@@ -15,7 +15,7 @@
 
 # Downloads
 
-- for windows, macos and linux there are automaticly build releases [here](https://github.com/nat3Github/weather-app-local/releases), feel free to use those for testing the app
+- for windows, macos and linux there are automaticly build releases for the latest tagged versions [here](https://github.com/nat3Github/weather-app-local/releases), feel free to use those for testing the app
 - these are build with a privat api key which can get exhausted as too many users use the auto releases
 - if this troubles you please consider getting your own api key from maptiler and [build from source](#Building-from-source)
 
