@@ -405,6 +405,7 @@ pub fn main() !void {
                     try dvui.addFont("sfpro", sf_pro_ttf, null);
                     const export_ready = try prepare_export();
                     if (export_ready) {
+                        TS.settle(export_frame) catch {};
                         const captured_bytes = try ts.capturePng(export_frame, null);
                         write_screenshot(ts.allocator, ts_ctx.pool, captured_bytes) catch |e| std.log.warn("{}", .{e});
                         do_export = false;

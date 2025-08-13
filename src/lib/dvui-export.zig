@@ -25,7 +25,6 @@ pub fn settle(frame: dvui.App.frameFunction) !void {
 
         return;
     }
-
     return error.unsettled;
 }
 
