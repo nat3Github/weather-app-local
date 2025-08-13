@@ -352,6 +352,12 @@ pub fn main() !void {
         const quit = try backend.addAllEvents(&app_win);
         if (quit) break :main_loop;
 
+        const id: dvui.Id = @enumFromInt(99);
+        if (dvui.timerDoneOrNone(id)) {
+            dvui.timer(id, 30 * 1000 * 1000);
+        }
+
+        std.log.warn("frame", .{});
         _ = Backend.c.SDL_SetRenderDrawColor(backend.renderer, 0, 0, 0, 255);
         _ = Backend.c.SDL_RenderClear(backend.renderer);
 
