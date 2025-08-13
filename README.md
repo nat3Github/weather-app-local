@@ -25,7 +25,7 @@
 - on windows you can run the .exe but you need to manually allow it to run when you launch it
 - note: i could not test the linux release since i dont own a linux system for now
 - an active internet connection is needed when running the app
-- the visualizations are generated on the fly, for good performance a modern computer is required
+- the visualizations are generated on the fly, so it probably wont run very smoothly on weak hardware
 
 # Keybindings
 
